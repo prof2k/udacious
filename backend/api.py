@@ -16,4 +16,4 @@ def after_request(response):
 
 @app.route('/')
 def healty():
-    return "Healthy"
+    return "Healthy", 200
