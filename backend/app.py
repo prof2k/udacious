@@ -101,8 +101,9 @@ def add_project(payload):
 
 # To update a project
 @app.route('/projects/<int:id>', methods=['PATCH'])
-@requires_auth()
+@requires_auth('')
 def update_project(payload, id):
+    print("Got here")
     project = Project.query.get(id)
 
     # Checks if such a project exists
