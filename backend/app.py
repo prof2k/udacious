@@ -29,12 +29,16 @@ def healthy():
 @app.route('/projects', methods=['GET'])
 def get_projects():
     projects = Project.query.order_by(desc(Project.id)).all()
+
+    # Check if there are any projects in the database
     if projects:
         try:
             formated_projects = [project.short() for project in projects]
         except:
             print(sys.exc_info())
             abort(422)
+    else:
+        projects = []
     return jsonify({
         'success': 200,
         'projects': formated_projects
@@ -73,8 +77,9 @@ def add_project(payload):
     data = request.get_json()
     student = get_or_add_student(payload['sub'])
 
-    try:
-        if data: 
+    # Checks if the request body contains something
+    if data: 
+        try:    
             new_project = Project(
                 name = data['name'],
                 description = data['description'],
@@ -84,22 +89,52 @@ def add_project(payload):
                 student_id = student.id
             )
             new_project.insert()
-        else:
-            abort(400)
-    except:
-        print(sys.exc_info())
-        abort(422)
+        except:
+            print(sys.exc_info())
+            abort(422)
+    else:
+        abort(400)
     return jsonify({
         'success': True,
         'project_id': new_project.id
     }), 200
 
+# To update a project
+@app.route('/projects/<int:id>', methods=['PATCH'])
+@requires_auth()
+def update_project(payload, id):
+    project = Project.query.get(id)
+
+    # Checks if such a project exists
+    if project:
+        # Checks if the editor is the owner of the project
+        if payload['sub'] == project.student_id:
+            data = request.get_json()
+            try:
+                project.name = data['name']
+                project.description = data['desctiption']
+                project.project_duration_in_days = data['project_duration']
+                project.notes = data['notes']
+                project.image_url = data['image_url']
+                project.update()
+            except:
+                abort(422)
+        else:
+            abort(403)
+    else:
+        abort(404)
+    return jsonify({
+        'success': True,
+        'project': project.long()
+    })
 
 # To delete a student and all corresponding projects (only Admins)
 @app.route('/students/<int:id>', methods=['DELETE'])
 @requires_auth('delete:student')
 def delete_student(payload, id):
     student = Student.query.filter_by(id=id).one_or_none()
+
+    # Checks if such a student exists
     if student:
         try:
             Project.query.filter(Project.student_id==id).delete()
@@ -121,6 +156,7 @@ def delete_student(payload, id):
 def delete_project(payload, id):
     project = Project.query.filter_by(id=id).one_or_none()
 
+    # Checks if such a project exists
     if project:
         try:
             project.delete()
