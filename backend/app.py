@@ -5,6 +5,7 @@ from sqlalchemy import desc
 from models import Project, Student, setup_db
 from auth import AuthError, requires_auth
 import sys
+from datetime import datetime
 
 app = Flask(__name__)
 setup_db(app)
@@ -38,7 +39,7 @@ def get_projects():
             print(sys.exc_info())
             abort(422)
     else:
-        projects = []
+        formated_projects = []
     return jsonify({
         'success': 200,
         'projects': formated_projects
@@ -126,7 +127,7 @@ def update_project(payload, id):
     return jsonify({
         'success': True,
         'project': project.long()
-    })
+    }), 200
 
 # To delete a student and all corresponding projects (only Admins)
 @app.route('/students/<int:id>', methods=['DELETE'])
@@ -167,6 +168,32 @@ def delete_project(payload, id):
     return jsonify({
         'success': True,
         'project_id': project.id
+    }), 200
+    
+ 
+# Comments
+
+# To add a comment
+@app.route('/project/<int:id>/comments', methods=['POST'])
+@requires_auth()
+def add_comment(id, payload):
+    data = request.get_json()
+    
+    # Checks if the body of the request contains anything
+    if data:
+        author = get_or_add_student(payload['sub'])
+        try: 
+            comment = Comment(
+                time_stamp = datetime.now(),
+                content = data['comment'],
+                author_id = author.id 
+            )
+        except:
+            abort(422)
+    else:
+        abort(400)
+    return jsonify({
+        'success': True
     }), 200
 
 
