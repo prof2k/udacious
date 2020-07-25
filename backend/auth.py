@@ -82,7 +82,7 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'Forbidden',
             'description': 'Not permitted action for this client'
-        }, 401)
+        }, 403)
 
     return True
 

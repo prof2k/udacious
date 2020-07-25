@@ -28,15 +28,27 @@ def healthy():
 # To get all projects
 @app.route('/projects', methods=['GET'])
 def get_projects():
-    try:
-        projects = Project.query.all()
-        formated_projects = [project.format() for project in projects]
-    except:
-        print(sys.exc_info())
-        abort(500)
+    projects = Project.query.order_by(desc(Project.id)).all()
+    if projects:
+        try:
+            formated_projects = [project.short() for project in projects]
+        except:
+            print(sys.exc_info())
+            abort(422)
     return jsonify({
         'success': 200,
         'projects': formated_projects
+    }), 200 
+
+# To get a project
+@app.route('/projects/<int:id>', methods=['GET'])
+def get_project(id):
+    project = Project.query.get(id)
+    if not project:
+        abort(404)
+    return jsonify({
+        'success': 200,
+        'projects': project.long()
     }), 200 
 
 # (Only used aftter authorizing)
@@ -62,7 +74,7 @@ def add_project(payload):
     student = get_or_add_student(payload['sub'])
 
     try:
-        if data:
+        if data: 
             new_project = Project(
                 name = data['name'],
                 description = data['description'],
@@ -82,6 +94,44 @@ def add_project(payload):
         'project_id': new_project.id
     }), 200
 
+
+# To delete a student and all corresponding projects (only Admins)
+@app.route('/students/<int:id>', methods=['DELETE'])
+@requires_auth('delete:student')
+def delete_student(payload, id):
+    student = Student.query.filter_by(id=id).one_or_none()
+    if student:
+        try:
+            Project.query.filter(Project.student_id==id).delete()
+            student.delete()
+        except:
+            print(sys.exc_info())
+            abort(422)
+    else:
+        abort(404)
+    return jsonify({
+        'success': True,
+        'student_id': student.id
+    }), 200
+
+
+# To delete a project (only Admins)
+@app.route('/projects/<int:id>', methods=['DELETE'])
+@requires_auth('delete:project')
+def delete_project(payload, id):
+    project = Project.query.filter_by(id=id).one_or_none()
+
+    if project:
+        try:
+            project.delete()
+        except:
+            abort(422)
+    else:
+        abort(404)
+    return jsonify({
+        'success': True,
+        'project_id': project.id
+    }), 200
 
 
 @app.route('/login')

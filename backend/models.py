@@ -45,7 +45,17 @@ class Project(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def format(self):
+    def short(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'project_duration': self.project_duration_in_days,
+            'student_id': self.student_id,
+            'image_url': self.image_url
+        }
+
+    def long(self):
         return {
             'id': self.id,
             'name': self.name,
