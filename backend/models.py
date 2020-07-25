@@ -26,9 +26,9 @@ class Project(db.Model):
     image_url = db.Column(db.String)
     name = db.Column(db.String(60), nullable=False)
     description = db.Column(db.String(150), nullable=False)
-    duration_in_days = db.Column(db.Integer)
-    notes = db.Column(db.String())
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    project_duration_in_days = db.Column(db.Integer)
+    notes = db.Column(db.String)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False, unique=True)
 
 
     # To insert a new model into db
@@ -44,6 +44,17 @@ class Project(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'project_duration': self.duration_in_days,
+            'notes': self.notes,
+            'student_id': self.student_id,
+            'image_url': self.image_url
+        }
 
 class Student(db.Model):
     __tablename__ = 'students'

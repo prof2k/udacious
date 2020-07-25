@@ -75,6 +75,9 @@ def check_permissions(permission, payload):
             'description': 'permission not in payload'
         }, 400)
 
+    if permission == "":
+        return True
+
     if permission not in payload['permissions']:
         raise AuthError({
             'code': 'Forbidden',
