@@ -1,5 +1,5 @@
 venv
 env
-frontend/node_modules
+frontend/udacious/node_modules
 .vscode
 __pycache__
