@@ -1,5 +1,6 @@
 from flask import Flask, abort, jsonify, abort, request
 from flask_cors import CORS
+from sqlalchemy import desc
 
 from models import Project, Student, setup_db
 from auth import AuthError, requires_auth
@@ -25,28 +26,41 @@ def healthy():
     return 'Healthy'
 
 # To get all projects
-
-
 @app.route('/projects', methods=['GET'])
 def get_projects():
     try:
         projects = Project.query.all()
-        formated_projects = [project.format for project in projects]
+        formated_projects = [project.format() for project in projects]
     except:
-        print(sys.exec_info())
+        print(sys.exc_info())
         abort(500)
     return jsonify({
         'success': 200,
         'projects': formated_projects
-    }), 200
+    }), 200 
+
+# (Only used aftter authorizing)
+# Gets a student from the database or adds one if that student doesn't exist
+def get_or_add_student(id):
+    try:
+        student = Student.query.filter_by(auth_id = id).one_or_none()
+
+        if not student:
+            student = Student(
+                auth_id = id
+            )
+            student.insert()
+    except:
+        abort(422)
+    return student
 
 # To post a project
-
-
 @app.route('/projects', methods=['POST'])
 @requires_auth('')
 def add_project(payload):
     data = request.get_json()
+    student = get_or_add_student(payload['sub'])
+
     try:
         if data:
             new_project = Project(
@@ -55,7 +69,7 @@ def add_project(payload):
                 project_duration_in_days = data['project_duration'],
                 notes = data['notes'],
                 image_url = data['image_url'],
-                # student_id = payload['sub']
+                student_id = student.id
             )
             new_project.insert()
         else:
