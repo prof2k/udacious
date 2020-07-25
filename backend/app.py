@@ -108,17 +108,21 @@ def update_project(payload, id):
 
     # Checks if such a project exists
     if project:
-        # Checks if the editor is the owner of the project
-        if payload['sub'] == project.student_id:
+        project_author = Student.query.filter_by(id=project.student_id).one_or_none()
+
+        # Checks if the editor is the author of the project
+        if payload['sub'] == project_author.auth_id:
             data = request.get_json()
+            print(data)
             try:
-                project.name = data['name']
-                project.description = data['desctiption']
-                project.project_duration_in_days = data['project_duration']
-                project.notes = data['notes']
-                project.image_url = data['image_url']
+                project.name = data.get('name', project.name)
+                project.description = data.get('description', project.description)
+                project.project_duration_in_days = data.get('project_duration', project.project_duration_in_days)
+                project.notes = data.get('notes', project.notes)
+                project.image_url = data.get('image_url', project.image_url)
                 project.update()
             except:
+                print(sys.exc_info())
                 abort(422)
         else:
             abort(403)
