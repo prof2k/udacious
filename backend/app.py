@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, abort, request
 from flask_cors import CORS
 from sqlalchemy import desc
 
-from models import Project, Student, setup_db
+from models import Project, Student, Comment, setup_db
 from auth import AuthError, requires_auth
 import sys
 from datetime import datetime
@@ -49,11 +49,19 @@ def get_projects():
 @app.route('/projects/<int:id>', methods=['GET'])
 def get_project(id):
     project = Project.query.get(id)
+    # Checks if project exists or not
     if not project:
         abort(404)
+
+    # Gets and properly formats comments related to a particular project
+    comments = Comment.query.filter_by(project_id=id).all()
+    formated_comments = [comment.format() for comment in comments]
+
+    formated_project = project.long()
+    formated_project['comments'] = formated_comments
     return jsonify({
         'success': 200,
-        'projects': project.long()
+        'projects': formated_project
     }), 200 
 
 # (Only used aftter authorizing)
@@ -178,28 +186,37 @@ def delete_project(payload, id):
 # Comments
 
 # To add a comment
-@app.route('/project/<int:id>/comments', methods=['POST'])
+@app.route('/projects/<int:id>/comments', methods=['POST'])
 @requires_auth()
-def add_comment(id, payload):
+def add_comment(payload, id):
     data = request.get_json()
     
-    # Checks if the body of the request contains anything
-    if data:
-        author = get_or_add_student(payload['sub'])
-        try: 
-            comment = Comment(
-                time_stamp = datetime.now(),
-                content = data['comment'],
-                author_id = author.id 
-            )
-        except:
-            abort(422)
+    # Checks if such a project exists
+    if Project.query.get(id):
+
+        # Checks if the body of the request is valid
+        if data:
+            author = get_or_add_student(payload['sub'])
+            try: 
+                new_comment = Comment(
+                    time_created = datetime.now(),
+                    content = data['comment'],
+                    author_id = author.id,
+                    project_id = id
+                )
+                new_comment.insert()
+            except:
+                abort(422)
+        else:
+            abort(400)
     else:
-        abort(400)
+        abort(404)
     return jsonify({
-        'success': True
+        'success': True,
+        'comment': new_comment.format()
     }), 200
 
+    
 
 @app.route('/login')
 def login(payload):

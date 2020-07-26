@@ -29,7 +29,7 @@ class Project(db.Model):
     project_duration_in_days = db.Column(db.Integer)
     notes = db.Column(db.String)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
-
+    db.relationship('Comment', backref='project', lazy='joined')
 
     # To insert a new model into db
     def insert(self):
@@ -73,6 +73,7 @@ class Student(db.Model):
     auth_id = db.Column(db.String, nullable=False, unique=True)
     name = db.Column(db.String(100))
     db.relationship('Project', backref='author', lazy=True)
+    db.relationship('Comment', backref='author', lazy=True)
 
     # To insert a new model into db
     def insert(self):
@@ -87,4 +88,35 @@ class Student(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-    
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    time_created = db.Column(db.DateTime, nullable=False)
+    content = db.Column(db.String, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+
+    # To insert a new comment into db
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    # To update an existing comment in the db
+    def update(self):
+        db.session.commit()
+
+    # To delete a comment from the db
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    # Standard way to  return a comment
+    def format(self):
+        return {
+            'time_created': self.time_created,
+            'content': self.content,
+            'author_id': self.author_id,
+            'project_id': self.project_id
+        }
