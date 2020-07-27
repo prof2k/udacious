@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 
 
-database_path = 'postgresql://postgres:password@localhost:5432/udacious'
+database_path = 'postgres://oyxuaomcludcin:eaa9d19d24d23164338d9496f6831a9e5042a88002365970da274ea7ee57eca6@ec2-54-197-254-117.compute-1.amazonaws.com:5432/dcjl675t4vnk6i'
 db = SQLAlchemy()
 
 
