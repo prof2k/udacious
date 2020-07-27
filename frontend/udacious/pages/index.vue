@@ -1,6 +1,7 @@
 <template>
   <div>
     <Header />
+    
     <section id="hero">
       <div class="container center-align">
         <h1>Join the Clique</h1>
@@ -13,52 +14,8 @@
       <div class="container">
         <div class="row">
 
-          <div class="col s4">
-            <div class="card">
-              <div class="card-image waves-effect waves-block waves-light">
-                <img class="activator" src="~assets/office.jpg">
-              </div>
-              <div class="card-content">
-                <span class="card-title activator grey-text text-darken-4">Card Title<i class="material-icons right">more_vert</i></span>
-                <p><a href="#">This is a link</a></p>
-              </div>
-              <div class="card-reveal">
-                <span class="card-title grey-text text-darken-4">Card Title<i class="material-icons right">close</i></span>
-                <p>Here is some more information about this product that is only revealed once clicked on.</p>
-              </div>
-            </div>
-          </div>
-          <div class="col s4">
-            <div class="card">
-              <div class="card-image waves-effect waves-block waves-light">
-                <img class="activator" src="~assets/office.jpg">
-              </div>
-              <div class="card-content">
-                <span class="card-title activator grey-text text-darken-4">Card Title<i class="material-icons right">more_vert</i></span>
-                <p><a href="#">This is a link</a></p>
-              </div>
-              <div class="card-reveal">
-                <span class="card-title grey-text text-darken-4">Card Title<i class="material-icons right">close</i></span>
-                <p>Here is some more information about this product that is only revealed once clicked on.</p>
-              </div>
-            </div>
-          </div>
-          <div class="col s4">
-            <div class="card">
-              <div class="card-image waves-effect waves-block waves-light">
-                <img class="activator" src="~assets/office.jpg">
-              </div>
-              <div class="card-content">
-                <span class="card-title activator grey-text text-darken-4">Card Title<i class="material-icons right">more_vert</i></span>
-                <p><a href="#">This is a link</a></p>
-              </div>
-              <div class="card-reveal">
-                <span class="card-title grey-text text-darken-4">Card Title<i class="material-icons right">close</i></span>
-                <p>Here is some more information about this product that is only revealed once clicked on.</p>
-              </div>
-            </div>
-          </div>
-
+          <Project v-for="project in projects" :key="project.id" :details='project' />
+					
         </div>
       </div>
     </section>
@@ -66,7 +23,31 @@
 </template>
 
 <script>
-export default {}
+import Project from '../components/Project';
+
+export default {	
+  components: {
+    Project 
+  },
+	data() {
+		return {
+			projects: []
+		}
+	},
+	mounted() {
+	},
+	async created() {
+		try {
+			const res = await this.$axios.get("/projects");
+			console.log(res.data);
+			
+			this.projects = res.data.projects
+		}
+		catch (err) {
+			console.log(err);
+		}
+	}
+}
 </script>
 
 <style>
@@ -97,8 +78,8 @@ p {
   color: transparent;
   background: linear-gradient(to right, rgb(74 146 234), #004b2e);
   -webkit-background-clip: text;
-  animation: hue-rotate 4s linear infinite;
-  /* filter: hue-rotate(100deg); */
+  background-clip: text;
+  /* animation: hue-rotate 10s linear infinite; */
 }
 
 #hero a[href *= projects] {
@@ -107,7 +88,7 @@ p {
 
 @keyframes hue-rotate {
   100% {
-    /* filter: hue-rotate(360deg) */
+    filter: hue-rotate(360deg)
   }
 }
 

@@ -13,5 +13,8 @@
     "@nuxtjs/axios": "^5.11.0",
     "nuxt": "^2.13.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^7.5.0",
+    "eslint-plugin-vue": "^7.0.0-beta.0"
+  }
 }

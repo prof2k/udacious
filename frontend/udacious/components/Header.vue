@@ -1,7 +1,7 @@
 <template>
   <nav class="light-blue accent-4 z-depth-3">
     <div class="nav-wrapper container">
-      <a href="#" class="brand-logo">Udacious</a>
+      <nuxt-link to="/" class="brand-logo">Udacious</nuxt-link>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li><a href="sass.html">Projects</a></li>
         <li><a href="badges.html">Login</a></li>
