@@ -14,7 +14,7 @@ CORS(app)
 
 
 @app.after_request
-def after_request(response):
+def after_request(response):    
     response.headers.add('Access-Control-Allow-Headers',
                          'Content-Type, Authorization')
     response.headers.add('Access-Control-Allow-Methods',
