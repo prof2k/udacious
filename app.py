@@ -41,7 +41,7 @@ def get_projects():
     else:
         formated_projects = []
     return jsonify({
-        'success': 200,
+        'success': True,
         'projects': formated_projects
     }), 200 
 
@@ -60,7 +60,7 @@ def get_project(id):
     formated_project = project.long()
     formated_project['comments'] = formated_comments
     return jsonify({
-        'success': 200,
+        'success': True,
         'projects': formated_project
     }), 200 
 
@@ -217,12 +217,6 @@ def add_comment(payload, id):
     }), 200
 
     
-
-@app.route('/login')
-def login(payload):
-    return 'hello world'
-
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
